@@ -65,7 +65,7 @@ export default function Navbar() {
               <div className="absolute -inset-0.5 bg-gradient-to-r from-slate-900 to-slate-700 rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-500" />
               <div className="relative bg-slate-900 text-white px-7 py-3 rounded-xl text-[13px] font-medium uppercase tracking-wider flex items-center gap-2.5 shadow-lg shadow-slate-900/20 group-hover:shadow-xl group-hover:shadow-slate-900/30 transition-all duration-300 group-hover:-translate-y-0.5">
                 <Phone size={14} className="group-hover:rotate-12 transition-transform" />
-                +225 0151 10 48 39
+                +225 05 44 40 47 80
               </div>
             </a>
           </div>
@@ -121,7 +121,7 @@ export default function Navbar() {
                 Appeler maintenant
               </div>
             </a>
-            <p className="text-center text-[13px] text-slate-400 mt-3 tracking-wide">+225 0151 10 48 39</p>
+            <p className="text-center text-[13px] text-slate-400 mt-3 tracking-wide">+225 05 44 40 47 80</p>
           </div>
         </div>
       </div>

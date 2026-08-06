@@ -9,11 +9,11 @@ import Register from "./pages/Register";
 import AdminDashboard from "./pages/AdminDashboard";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import Catalog from './components/Catalog';
-import CarDetails from './components/CarDetails';
+import Catalog from "./components/Catalog";
+import CarDetails from "./components/CarDetails";
 
-// NOUVEAU : Importe le composant que l'on vient de créer
-import ImportData from './components/ImportData'; 
+// Composant pour l'importation de données
+import ImportData from "./components/ImportData"; 
 
 export default function App() {
   return (
@@ -23,15 +23,31 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Accueil />} />
           
+          <Route path="/vente" element={<Vente />} />
+          <Route path="/location" element={<Location />} />
+          
+          {/* CORRECTION : Ajout de la route /vehicule/:id correspondant à l'URL appelée */}
+          <Route path="/vehicule/:id" element={<CarDetails />} />
+          <Route path="/voiture/:id" element={<CarDetails />} />
           <Route path="/detail/:id" element={<Detail />} />
+          
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<AdminDashboard />} />
           <Route path="/catalogue" element={<Catalog />} />
-          <Route path="/voiture/:id" element={<CarDetails />} />
           
-          {/* NOUVEAU : La route temporaire pour importer tes voitures */}
+          {/* Route temporaire pour importer vos voitures */}
           <Route path="/import" element={<ImportData />} />
+
+          {/* Route 404 pour gérer les pages inexistantes */}
+          <Route 
+            path="*" 
+            element={
+              <div className="p-12 text-center text-slate-600 font-medium">
+                404 - Page introuvable
+              </div>
+            } 
+          />
         </Routes>
       </div>
       <Footer />

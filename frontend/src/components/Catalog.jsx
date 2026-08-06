@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { db } from '../firebaseConfig';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore'; 
-import { LayoutGrid, Star, Crown, Diamond, Loader2, MessageCircle, Zap, Truck, MapPin } from 'lucide-react';
+import { collection, getDocs } from 'firebase/firestore'; 
+import { LayoutGrid, Star, Crown, Diamond, Loader2, MessageCircle, Zap, Tag, Share2, Heart, SlidersHorizontal, Fuel, CheckCircle2, Key } from 'lucide-react';
 
 const getOptimizedImage = (url) => {
   if (!url || !url.includes('cloudinary.com')) return url;
@@ -13,71 +13,93 @@ const getOptimizedImage = (url) => {
   return url;
 };
 
-// --- SOUS-COMPOSANT : Carte interactive (Gère Voitures et Engins) ---
-const CarCard = ({ item, handleContactAdmin, isEngin = false }) => {
-  // Pour les voitures on prend images.front, pour les engins on prend imageUrl
-  const displayImage = isEngin ? item.imageUrl : (item.images?.front || item.image);
+// --- SOUS-COMPOSANT : Carte Voiture ---
+const CarCard = ({ item, handleContactAdmin }) => {
+  const displayImage = item.images?.front || item.image;
   
+  // Normalisation de l'état pour l'affichage du badge
+  const conditionText = item.condition ? item.condition.toUpperCase() : 'NEUF';
+  const isNeuf = conditionText.includes('NEUF');
+
   return (
-    <div className="bg-[#0f0f0f] border border-white/5 rounded-[2.5rem] overflow-hidden hover:border-[#fb201e]/40 transition-all group relative h-full flex flex-col">
+    <div className="bg-white text-slate-900 border border-slate-100 rounded-[2rem] overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 group relative h-full flex flex-col">
       
-      {/* Badge Disponibilité (Uniquement pour voitures) */}
-      {!isEngin && item.availability && (
-        <div className={`absolute top-4 right-4 z-10 text-[9px] font-black uppercase px-4 py-2 rounded-full shadow-2xl backdrop-blur-md border ${
-          item.availability === 'Disponible' ? 'bg-[#22c55e]/90 text-white border-green-400 animate-pulse' : 
-          item.availability === 'En arrivage' ? 'bg-blue-500/80 text-white border-blue-400' : 
-          'bg-red-500/80 text-white border-red-400'
-        }`}>
-          {item.availability === 'Disponible' ? '✅ Dispo de suite' : item.availability}
-        </div>
-      )}
-
-      {/* Badge Catégorie (Pour les Engins) */}
-      {isEngin && (
-        <div className="absolute top-4 right-4 z-10 text-[9px] font-black uppercase px-4 py-2 rounded-full shadow-2xl backdrop-blur-md border bg-[#fb201e] text-white border-red-400">
-          {item.category}
-        </div>
-      )}
-
-      <div className="h-72 overflow-hidden relative flex-shrink-0">
-        <img 
-          src={getOptimizedImage(displayImage)} 
-          alt={item.model || item.name} 
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-        />
-        <div className="absolute bottom-4 left-4 flex gap-2">
-          <span className="bg-black/80 backdrop-blur-md text-white text-[9px] font-black px-3 py-1 rounded-full uppercase border border-white/10">
-            {isEngin ? item.tonnage : item.brand}
-          </span>
-        </div>
+      {/* Badge État (Neuf / Occasion) positionné en haut à gauche sur l'image */}
+      <div className={`absolute top-4 left-4 z-10 text-[10px] font-black uppercase px-3.5 py-1.5 rounded-full shadow-md text-white tracking-wider ${
+        isNeuf ? 'bg-[#22c55e]' : 'bg-slate-900'
+      }`}>
+        {conditionText}
       </div>
 
-      <div className="p-8 flex flex-col flex-grow">
-        <div className="mb-4">
-          <h3 className="text-2xl font-black italic uppercase">{isEngin ? item.name : item.model}</h3>
-          <p className="text-white/30 text-[10px] font-bold uppercase flex items-center gap-1">
-            {isEngin ? <><MapPin size={10}/> {item.location}</> : `Réf: ${item.id.slice(0,6)}`}
-          </p>
+      {/* Image & Logo de la marque */}
+      <div className="h-64 overflow-hidden relative flex-shrink-0 bg-slate-100">
+        <img 
+          src={getOptimizedImage(displayImage)} 
+          alt={item.model} 
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+        />
+        {item.brandLogo && (
+          <div className="absolute top-4 right-4 w-9 h-9 bg-white rounded-full p-1.5 shadow-md flex items-center justify-center border border-slate-100">
+            <img src={item.brandLogo} alt={item.brand} className="max-w-full max-h-full object-contain" />
+          </div>
+        )}
+      </div>
+
+      {/* Contenu de la carte */}
+      <div className="p-6 flex flex-col flex-grow">
+        <div className="flex justify-between items-start mb-2">
+          <div>
+            <h3 className="text-xl font-black text-slate-900 tracking-tight">
+              {item.model} <span className="text-sm font-normal text-slate-400">({item.year || '2024'})</span>
+            </h3>
+          </div>
+          <div className="flex items-center gap-2 text-slate-400">
+            <button className="hover:text-slate-700 transition-colors p-1"><Share2 size={16} /></button>
+            <button className="hover:text-red-500 transition-colors p-1"><Heart size={16} /></button>
+          </div>
+        </div>
+
+        {/* Prix */}
+        <div className="text-2xl font-black text-blue-600 mb-4 tracking-tight">
+          {item.price ? `${item.price.toLocaleString()} FCFA` : "Sur Devis"}
         </div>
         
-        <div className="flex items-center justify-between mt-auto pt-6 border-t border-white/5">
-          <div className="flex flex-col">
-            <span className="text-white/30 text-[8px] font-black uppercase">{isEngin ? "Localisation" : "Prix TTC"}</span>
-            <span className="text-[#fb201e] text-xl font-black italic">
-               {isEngin ? item.location : (item.price || "Sur Devis")}
-            </span>
-          </div>
-          <div className="flex gap-2">
-            <button onClick={() => handleContactAdmin(item, isEngin)} className="bg-[#111] border border-white/5 text-green-500 h-12 w-12 rounded-full flex items-center justify-center hover:bg-[#25D366] hover:text-white transition-all">
-              <MessageCircle size={20} />
-            </button>
-            {!isEngin && (
-              <Link to={`/voiture/${item.id}`} className="bg-white text-black h-12 w-12 rounded-full flex items-center justify-center hover:bg-[#fb201e] hover:text-white transition-all">
-                <LayoutGrid size={20} />
-              </Link>
-            )}
-          </div>
+        {/* Caractéristiques (Transmission & Carburant) */}
+        <div className="flex items-center gap-4 text-xs text-slate-500 mb-4 font-medium">
+          <span className="flex items-center gap-1.5">
+            <SlidersHorizontal size={14} className="text-slate-400" /> {item.transmission || 'Automatique'}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Fuel size={14} className="text-slate-400" /> {item.fuel || 'Essence'}
+          </span>
         </div>
+
+        {/* Badges de certification */}
+        <div className="flex flex-wrap gap-2 mb-6 pt-3 border-t border-slate-100">
+          {item.certified !== false && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
+              <CheckCircle2 size={12} /> Certifiée
+            </span>
+          )}
+          {item.inspected !== false && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
+              <CheckCircle2 size={12} /> Inspectée
+            </span>
+          )}
+          {item.warranty && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
+              <Key size={12} /> {item.warranty}
+            </span>
+          )}
+        </div>
+
+        {/* Bouton Consulter l'offre */}
+        <Link 
+          to={`/voiture/${item.id}`} 
+          className="mt-auto w-full bg-slate-900 hover:bg-[#fb201e] text-white font-bold py-3.5 px-4 rounded-2xl text-center text-xs uppercase tracking-wider transition-colors shadow-md flex items-center justify-center gap-2"
+        >
+          Consulter l'offre
+        </Link>
       </div>
     </div>
   );
@@ -85,25 +107,19 @@ const CarCard = ({ item, handleContactAdmin, isEngin = false }) => {
 
 export default function Catalog() {
   const [cars, setCars] = useState([]);
-  const [heavyVehicles, setHeavyVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedBrand, setSelectedBrand] = useState(null);
   const sliderRef = useRef(null);
   const [searchParams] = useSearchParams();
   const categoryFromUrl = searchParams.get('categorie');
   
-  const [activeFilter, setActiveFilter] = useState(categoryFromUrl ? (categoryFromUrl.toUpperCase()) : "Tous");
+  const [activeFilter, setActiveFilter] = useState(categoryFromUrl ? categoryFromUrl.toUpperCase() : "Tous");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch Voitures
         const carsSnap = await getDocs(collection(db, "cars"));
         setCars(carsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-        
-        // Fetch Engins
-        const enginsSnap = await getDocs(query(collection(db, "heavy_vehicles"), orderBy("createdAt", "desc")));
-        setHeavyVehicles(enginsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-
       } catch (error) { 
         console.error("Erreur Fetch:", error); 
       } finally { 
@@ -112,6 +128,23 @@ export default function Catalog() {
     };
     fetchData();
   }, []);
+
+  // --- EXTRACTION DYNAMIQUE DES MARQUES ---
+  const carBrands = useMemo(() => {
+    const brandsMap = {};
+    cars.forEach(car => {
+      if (car.brand) {
+        const brandName = car.brand.trim();
+        if (!brandsMap[brandName]) {
+          brandsMap[brandName] = car.brandLogo || `https://api.iconify.design/simple-icons:${brandName.toLowerCase().replace(/[^a-z0-9]/g, '')}.svg`;
+        }
+      }
+    });
+    return Object.keys(brandsMap).map(name => ({
+      name,
+      logo: brandsMap[name]
+    }));
+  }, [cars]);
 
   // --- LOGIQUE SLIDER : Uniquement Voitures Disponibles ---
   const availableCars = useMemo(() => cars.filter(c => c.availability === 'Disponible').slice(0, 8), [cars]);
@@ -128,36 +161,41 @@ export default function Catalog() {
     return () => clearInterval(interval);
   }, [availableCars]);
 
-  const getNumericPrice = (p) => p ? parseInt(p.replace(/[^0-9]/g, ''), 10) : 0;
+  const getNumericPrice = (p) => p ? parseInt(p.toString().replace(/[^0-9]/g, ''), 10) : 0;
 
   // --- LOGIQUE FILTRAGE DYNAMIQUE ---
   const filteredItems = useMemo(() => {
-    if (activeFilter === "ENGIN") return heavyVehicles;
-    
-    if (activeFilter === "Tous") return cars;
+    let items = cars;
 
-    return cars.filter(car => {
-      const price = getNumericPrice(car.price);
-      if (activeFilter === "GOLD") return price >= 5000000 && price <= 6500000 || car.offer === "Gold";
-      if (activeFilter === "PREMIUM") return price > 6500000 && price <= 10000000 || car.offer === "Premium";
-      if (activeFilter === "VIP") return price > 10000000 || car.offer === "VIP";
-      return false;
-    });
-  }, [cars, heavyVehicles, activeFilter]);
+    if (activeFilter !== "Tous") {
+      items = items.filter(car => {
+        const price = getNumericPrice(car.price);
+        if (activeFilter === "GOLD") return (price >= 5000000 && price <= 6500000) || car.offer === "Gold";
+        if (activeFilter === "PREMIUM") return (price > 6500000 && price <= 10000000) || car.offer === "Premium";
+        if (activeFilter === "VIP") return price > 10000000 || car.offer === "VIP";
+        return false;
+      });
+    }
+
+    if (selectedBrand) {
+      items = items.filter(car => car.brand?.toLowerCase() === selectedBrand.toLowerCase());
+    }
+
+    return items;
+  }, [cars, activeFilter, selectedBrand]);
 
   const filters = [
     { name: "Tous", icon: <LayoutGrid size={16} />, desc: "Tout le stock" },
     { name: "GOLD", icon: <Star size={16} fill="currentColor" />, desc: "Budget Moyen" },
     { name: "PREMIUM", icon: <Crown size={16} fill="currentColor" />, desc: "Haut de gamme" },
     { name: "VIP", icon: <Diamond size={16} fill="currentColor" />, desc: "Luxe & Prestige" },
-    { name: "ENGIN", icon: <Truck size={16} />, desc: "Poids Lourds" },
   ];
 
-  const handleContactAdmin = (item, isEngin) => {
+  const handleContactAdmin = (item) => {
     const adminWhatsApp = "2250151104839";
-    const name = isEngin ? item.name : `${item.brand} ${item.model}`;
-    const price = isEngin ? `(Tonnage: ${item.tonnage})` : `(${item.price})`;
-    const msg = `Bonjour AutoLife, je souhaiterais des informations sur cet engin/véhicule : ${name} ${price}.`;
+    const name = `${item.brand} ${item.model}`;
+    const price = `(${item.price})`;
+    const msg = `Bonjour AutoLife, je souhaiterais des informations sur ce véhicule : ${name} ${price}.`;
     window.open(`https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
@@ -172,13 +210,6 @@ export default function Catalog() {
     <div className="min-h-screen bg-black text-white py-16 px-4 md:px-6 overflow-hidden">
       <div className="max-w-7xl mx-auto">
         
-        <div className="flex flex-col items-center text-center mb-16">
-          <h2 className="text-5xl md:text-7xl font-black italic uppercase tracking-tighter">
-            Nos <span className="text-[#fb201e]">Catalogues</span>
-          </h2>
-          <p className="text-white/30 text-[10px] font-bold uppercase tracking-[0.3em] mt-4">AutoLife Services • Côte d'Ivoire</p>
-        </div>
-
         {/* SECTION SLIDER : VEHICULES DISPONIBLES */}
         {availableCars.length > 0 && (
           <div className="mb-20 animate-in fade-in slide-in-from-bottom-6 duration-700">
@@ -196,7 +227,71 @@ export default function Catalog() {
           </div>
         )}
 
-        {/* BARRE DE FILTRES */}
+        {/* En-tête de section */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-bold uppercase tracking-wider mb-3 backdrop-blur-md">
+              <Tag size={14} />
+              <span>Showroom Vente</span>
+            </div>
+
+            <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight">
+              Véhicules en vente
+            </h2>
+            <p className="text-sm md:text-base text-slate-300 mt-1.5">
+              Explorez notre sélection de véhicules <span className="font-bold text-blue-400">neufs et d'occasion</span> certifiés au meilleur prix
+            </p>
+          </div>
+        </div>
+
+        {/* Grille de sélection par marque */}
+        <div className="mb-10 bg-slate-900/60 backdrop-blur-md p-6 rounded-3xl shadow-xl border border-white/10">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+              Filtrer par marque ({carBrands.length} marques disponibles)
+            </span>
+            {selectedBrand && (
+              <button
+                onClick={() => setSelectedBrand(null)}
+                className="text-xs font-semibold text-blue-400 hover:text-blue-300 underline transition-colors"
+              >
+                Réinitialiser la marque
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-3 md:gap-4 max-h-[320px] overflow-y-auto pr-1">
+            {carBrands.map((brand) => {
+              const isSelected = selectedBrand === brand.name;
+              return (
+                <button
+                  key={brand.name}
+                  onClick={() => setSelectedBrand(isSelected ? null : brand.name)}
+                  className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-300 w-24 md:w-28 ${
+                    isSelected
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30 scale-105 ring-2 ring-blue-400'
+                      : 'bg-white/90 hover:bg-white text-slate-800 hover:shadow-md hover:-translate-y-0.5 border border-white/20'
+                  }`}
+                >
+                  <div className="w-10 h-10 md:w-11 md:h-11 flex items-center justify-center mb-2">
+                    <img
+                      src={brand.logo}
+                      alt={brand.name}
+                      className={`max-w-full max-h-full object-contain transition-all ${
+                        isSelected ? 'brightness-0 invert' : ''
+                      }`}
+                    />
+                  </div>
+                  <span className="text-[11px] md:text-xs font-bold tracking-tight text-center truncate w-full">
+                    {brand.name}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* BARRE DE FILTRES BUDGET / GAMME */}
         <div className="flex flex-wrap justify-center gap-3 md:gap-6 mb-16">
           {filters.map((f) => (
             <button
@@ -223,13 +318,12 @@ export default function Catalog() {
                 key={item.id} 
                 item={item} 
                 handleContactAdmin={handleContactAdmin} 
-                isEngin={activeFilter === "ENGIN"} 
               />
             ))}
           </div>
         ) : (
           <div className="text-center py-20 bg-[#0a0a0a] rounded-[3rem] border border-white/5">
-            <p className="text-white/20 font-black italic text-2xl uppercase">Rien en stock pour <span className="text-[#fb201e]">{activeFilter}</span></p>
+            <p className="text-white/20 font-black italic text-2xl uppercase">Rien en stock pour vos critères</p>
           </div>
         )}
       </div>
