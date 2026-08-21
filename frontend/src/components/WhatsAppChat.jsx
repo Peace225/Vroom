@@ -8,6 +8,7 @@ export default function WhatsAppChat() {
   const defaultMessage = "Bonjour Vroom CI, je vous contacte depuis votre site web et j'aimerais avoir plus d'informations.";
 
   const handleWhatsAppClick = () => {
+    // CORRECTION ICI : Remplacement du numéro en dur par la variable ${phoneNumber}
     const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(defaultMessage)}`;
     window.open(url, "_blank");
   };

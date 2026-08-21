@@ -163,18 +163,17 @@ const VehicleIcon = ({ type }) => {
 const CategoryCard = ({ label, iconType, onClick }) => (
   <button
     onClick={() => onClick && onClick(label)}
-    className="bg-white p-4 rounded-xl flex flex-col items-center justify-between transition-all duration-200 hover:shadow-md hover:-translate-y-1 group cursor-pointer w-full"
+    className="bg-white p-3 sm:p-4 rounded-xl flex flex-col items-center justify-between transition-all duration-200 hover:shadow-md hover:-translate-y-1 group cursor-pointer w-full border border-slate-100 sm:border-transparent shadow-sm sm:shadow-none"
   >
-    <div className="w-24 h-14 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+    <div className="w-20 h-12 sm:w-24 sm:h-14 flex items-center justify-center mb-2 sm:mb-3 group-hover:scale-105 transition-transform">
       <VehicleIcon type={iconType} />
     </div>
-    <span className="text-[11px] font-bold text-slate-800 tracking-wider group-hover:text-blue-600">
+    <span className="text-[10px] sm:text-[11px] font-bold text-slate-800 tracking-wider group-hover:text-blue-600 text-center leading-tight">
       {label}
     </span>
   </button>
 );
 
-// Tableau des catégories mis à jour incluant la Fourgonnette
 const categories = [
   { label: '4X4', iconType: '4X4' },
   { label: 'COMPACTE', iconType: 'COMPACTE' },
@@ -187,21 +186,22 @@ const categories = [
 
 export default function VehicleCategorySearch({ onSelectCategory }) {
   return (
-    <section className="bg-white py-12 px-4">
+    <section className="bg-white py-8 sm:py-12 px-4">
       <div className="max-w-7xl mx-auto flex flex-col items-center">
+        
         {/* En-tête */}
-        <div className="mb-10 text-center flex flex-col items-center">
-          <div className="w-16 h-1 bg-blue-700 mb-4 rounded-full" />
-          <h2 className="text-3xl font-extrabold text-slate-900">
+        <div className="mb-8 sm:mb-10 text-center flex flex-col items-center">
+          <div className="w-12 h-1 sm:w-16 sm:h-1 bg-blue-700 mb-3 sm:mb-4 rounded-full" />
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight">
             Rechercher par Catégorie
           </h2>
-          <p className="text-sm text-slate-500 font-medium mt-2">
+          <p className="text-xs sm:text-sm text-slate-500 font-medium mt-2">
             Rechercher par type carrosserie
           </p>
         </div>
 
-        {/* Grille unique pour tous les véhicules */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4 w-full">
+        {/* Grille responsive optimisée */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4 w-full">
           {categories.map((cat) => (
             <CategoryCard 
               key={cat.label} 
@@ -211,6 +211,7 @@ export default function VehicleCategorySearch({ onSelectCategory }) {
             />
           ))}
         </div>
+        
       </div>
     </section>
   );

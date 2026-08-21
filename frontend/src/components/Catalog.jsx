@@ -22,73 +22,73 @@ const CarCard = ({ item, handleContactAdmin }) => {
   const isNeuf = conditionText.includes('NEUF');
 
   return (
-    <div className="bg-white text-slate-900 border border-slate-100 rounded-[2rem] overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 group relative h-full flex flex-col">
+    <div className="bg-white text-slate-900 border border-slate-100 rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 group relative h-full flex flex-col">
       
-      {/* Badge État (Neuf / Occasion) positionné en haut à gauche sur l'image */}
-      <div className={`absolute top-4 left-4 z-10 text-[10px] font-black uppercase px-3.5 py-1.5 rounded-full shadow-md text-white tracking-wider ${
+      {/* Badge État (Neuf / Occasion) */}
+      <div className={`absolute top-3 left-3 md:top-4 md:left-4 z-10 text-[9px] md:text-[10px] font-black uppercase px-2.5 py-1 md:px-3.5 md:py-1.5 rounded-full shadow-md text-white tracking-wider ${
         isNeuf ? 'bg-[#22c55e]' : 'bg-slate-900'
       }`}>
         {conditionText}
       </div>
 
       {/* Image & Logo de la marque */}
-      <div className="h-64 overflow-hidden relative flex-shrink-0 bg-slate-100">
+      <div className="h-48 md:h-64 overflow-hidden relative flex-shrink-0 bg-slate-100">
         <img 
           src={getOptimizedImage(displayImage)} 
           alt={item.model} 
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
         />
         {item.brandLogo && (
-          <div className="absolute top-4 right-4 w-9 h-9 bg-white rounded-full p-1.5 shadow-md flex items-center justify-center border border-slate-100">
+          <div className="absolute top-3 right-3 md:top-4 md:right-4 w-7 h-7 md:w-9 md:h-9 bg-white rounded-full p-1 md:p-1.5 shadow-md flex items-center justify-center border border-slate-100">
             <img src={item.brandLogo} alt={item.brand} className="max-w-full max-h-full object-contain" />
           </div>
         )}
       </div>
 
       {/* Contenu de la carte */}
-      <div className="p-6 flex flex-col flex-grow">
-        <div className="flex justify-between items-start mb-2">
+      <div className="p-4 md:p-6 flex flex-col flex-grow">
+        <div className="flex justify-between items-start mb-1 md:mb-2">
           <div>
-            <h3 className="text-xl font-black text-slate-900 tracking-tight">
-              {item.model} <span className="text-sm font-normal text-slate-400">({item.year || '2024'})</span>
+            <h3 className="text-lg md:text-xl font-black text-slate-900 tracking-tight">
+              {item.model} <span className="text-xs md:text-sm font-normal text-slate-400">({item.year || '2024'})</span>
             </h3>
           </div>
-          <div className="flex items-center gap-2 text-slate-400">
-            <button className="hover:text-slate-700 transition-colors p-1"><Share2 size={16} /></button>
-            <button className="hover:text-red-500 transition-colors p-1"><Heart size={16} /></button>
+          <div className="flex items-center gap-1 md:gap-2 text-slate-400">
+            <button className="hover:text-slate-700 transition-colors p-1"><Share2 size={14} className="md:w-4 md:h-4" /></button>
+            <button className="hover:text-red-500 transition-colors p-1"><Heart size={14} className="md:w-4 md:h-4" /></button>
           </div>
         </div>
 
         {/* Prix */}
-        <div className="text-2xl font-black text-blue-600 mb-4 tracking-tight">
+        <div className="text-xl md:text-2xl font-black text-blue-600 mb-3 md:mb-4 tracking-tight">
           {item.price ? `${item.price.toLocaleString()} FCFA` : "Sur Devis"}
         </div>
         
         {/* Caractéristiques (Transmission & Carburant) */}
-        <div className="flex items-center gap-4 text-xs text-slate-500 mb-4 font-medium">
+        <div className="flex items-center gap-3 md:gap-4 text-[10px] md:text-xs text-slate-500 mb-3 md:mb-4 font-medium">
           <span className="flex items-center gap-1.5">
-            <SlidersHorizontal size={14} className="text-slate-400" /> {item.transmission || 'Automatique'}
+            <SlidersHorizontal size={12} className="md:w-3.5 md:h-3.5 text-slate-400" /> {item.transmission || 'Automatique'}
           </span>
           <span className="flex items-center gap-1.5">
-            <Fuel size={14} className="text-slate-400" /> {item.fuel || 'Essence'}
+            <Fuel size={12} className="md:w-3.5 md:h-3.5 text-slate-400" /> {item.fuel || 'Essence'}
           </span>
         </div>
 
         {/* Badges de certification */}
-        <div className="flex flex-wrap gap-2 mb-6 pt-3 border-t border-slate-100">
+        <div className="flex flex-wrap gap-1.5 md:gap-2 mb-4 md:mb-6 pt-2.5 md:pt-3 border-t border-slate-100">
           {item.certified !== false && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
-              <CheckCircle2 size={12} /> Certifiée
+            <span className="inline-flex items-center gap-1 text-[9px] md:text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 md:px-2.5 md:py-1 rounded-full">
+              <CheckCircle2 size={10} className="md:w-3 md:h-3" /> Certifiée
             </span>
           )}
           {item.inspected !== false && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
-              <CheckCircle2 size={12} /> Inspectée
+            <span className="inline-flex items-center gap-1 text-[9px] md:text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 md:px-2.5 md:py-1 rounded-full">
+              <CheckCircle2 size={10} className="md:w-3 md:h-3" /> Inspectée
             </span>
           )}
           {item.warranty && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
-              <Key size={12} /> {item.warranty}
+            <span className="inline-flex items-center gap-1 text-[9px] md:text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 md:px-2.5 md:py-1 rounded-full">
+              <Key size={10} className="md:w-3 md:h-3" /> {item.warranty}
             </span>
           )}
         </div>
@@ -96,7 +96,7 @@ const CarCard = ({ item, handleContactAdmin }) => {
         {/* Bouton Consulter l'offre */}
         <Link 
           to={`/voiture/${item.id}`} 
-          className="mt-auto w-full bg-slate-900 hover:bg-[#fb201e] text-white font-bold py-3.5 px-4 rounded-2xl text-center text-xs uppercase tracking-wider transition-colors shadow-md flex items-center justify-center gap-2"
+          className="mt-auto w-full bg-slate-900 hover:bg-[#fb201e] text-white font-bold py-2.5 md:py-3.5 px-3 md:px-4 rounded-xl md:rounded-2xl text-center text-[10px] md:text-xs uppercase tracking-wider transition-colors shadow-md flex items-center justify-center gap-2"
         >
           Consulter l'offre
         </Link>
@@ -185,10 +185,10 @@ export default function Catalog() {
   }, [cars, activeFilter, selectedBrand]);
 
   const filters = [
-    { name: "Tous", icon: <LayoutGrid size={16} />, desc: "Tout le stock" },
-    { name: "GOLD", icon: <Star size={16} fill="currentColor" />, desc: "Budget Moyen" },
-    { name: "PREMIUM", icon: <Crown size={16} fill="currentColor" />, desc: "Haut de gamme" },
-    { name: "VIP", icon: <Diamond size={16} fill="currentColor" />, desc: "Luxe & Prestige" },
+    { name: "Tous", icon: <LayoutGrid size={14} className="md:w-4 md:h-4" />, desc: "Tout le stock" },
+    { name: "GOLD", icon: <Star size={14} className="md:w-4 md:h-4" fill="currentColor" />, desc: "Budget Moyen" },
+    { name: "PREMIUM", icon: <Crown size={14} className="md:w-4 md:h-4" fill="currentColor" />, desc: "Haut de gamme" },
+    { name: "VIP", icon: <Diamond size={14} className="md:w-4 md:h-4" fill="currentColor" />, desc: "Luxe & Prestige" },
   ];
 
   const handleContactAdmin = (item) => {
@@ -201,23 +201,23 @@ export default function Catalog() {
 
   if (loading) return (
     <div className="min-h-screen bg-black flex flex-col justify-center items-center">
-      <Loader2 className="animate-spin text-[#fb201e] mb-4" size={48} />
-      <p className="text-white/20 font-black text-xs uppercase tracking-widest">Initialisation du catalogue...</p>
+      <Loader2 className="animate-spin text-[#fb201e] mb-4" size={40} className="md:w-12 md:h-12" />
+      <p className="text-white/20 font-black text-[10px] md:text-xs uppercase tracking-widest">Initialisation du catalogue...</p>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-black text-white py-16 px-4 md:px-6 overflow-hidden">
+    <div className="min-h-screen bg-black text-white py-10 md:py-16 px-4 md:px-6 overflow-hidden">
       <div className="max-w-7xl mx-auto">
         
         {/* SECTION SLIDER : VEHICULES DISPONIBLES */}
         {availableCars.length > 0 && (
-          <div className="mb-20 animate-in fade-in slide-in-from-bottom-6 duration-700">
-            <div className="flex items-center gap-3 mb-8">
-              <Zap className="text-[#22c55e]" size={28} />
-              <h3 className="text-2xl font-black italic uppercase">Véhicules <span className="text-[#22c55e]">Disponibles</span></h3>
+          <div className="mb-12 md:mb-20 animate-in fade-in slide-in-from-bottom-6 duration-700">
+            <div className="flex items-center gap-2 md:gap-3 mb-6 md:mb-8">
+              <Zap className="text-[#22c55e] w-6 h-6 md:w-7 md:h-7" />
+              <h3 className="text-xl md:text-2xl font-black italic uppercase">Véhicules <span className="text-[#22c55e]">Disponibles</span></h3>
             </div>
-            <div ref={sliderRef} className="flex overflow-x-auto gap-6 pb-8 scroll-smooth no-scrollbar">
+            <div ref={sliderRef} className="flex overflow-x-auto gap-4 md:gap-6 pb-6 md:pb-8 scroll-smooth no-scrollbar">
               {availableCars.map((car) => (
                 <div key={`dispo-${car.id}`} className="min-w-[85vw] sm:min-w-[400px] lg:min-w-[380px] flex-shrink-0">
                   <CarCard item={car} handleContactAdmin={handleContactAdmin} />
@@ -228,52 +228,52 @@ export default function Catalog() {
         )}
 
         {/* En-tête de section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 md:mb-10 gap-3 md:gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-bold uppercase tracking-wider mb-3 backdrop-blur-md">
-              <Tag size={14} />
+            <div className="inline-flex items-center gap-1.5 md:gap-2 px-2.5 py-1 md:px-3.5 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-[10px] md:text-xs font-bold uppercase tracking-wider mb-2 md:mb-3 backdrop-blur-md">
+              <Tag size={12} className="md:w-3.5 md:h-3.5" />
               <span>Showroom Vente</span>
             </div>
 
-            <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-white tracking-tight">
               Véhicules en vente
             </h2>
-            <p className="text-sm md:text-base text-slate-300 mt-1.5">
+            <p className="text-xs md:text-base text-slate-300 mt-1 md:mt-1.5">
               Explorez notre sélection de véhicules <span className="font-bold text-blue-400">neufs et d'occasion</span> certifiés au meilleur prix
             </p>
           </div>
         </div>
 
         {/* Grille de sélection par marque */}
-        <div className="mb-10 bg-slate-900/60 backdrop-blur-md p-6 rounded-3xl shadow-xl border border-white/10">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-              Filtrer par marque ({carBrands.length} marques disponibles)
+        <div className="mb-8 md:mb-10 bg-slate-900/60 backdrop-blur-md p-4 md:p-6 rounded-2xl md:rounded-3xl shadow-xl border border-white/10">
+          <div className="flex items-center justify-between mb-3 md:mb-4">
+            <span className="text-[10px] md:text-xs font-bold text-slate-300 uppercase tracking-wider">
+              Filtrer par marque <span className="hidden md:inline">({carBrands.length} disponibles)</span>
             </span>
             {selectedBrand && (
               <button
                 onClick={() => setSelectedBrand(null)}
-                className="text-xs font-semibold text-blue-400 hover:text-blue-300 underline transition-colors"
+                className="text-[10px] md:text-xs font-semibold text-blue-400 hover:text-blue-300 underline transition-colors"
               >
-                Réinitialiser la marque
+                Réinitialiser <span className="hidden md:inline">la marque</span>
               </button>
             )}
           </div>
 
-          <div className="flex flex-wrap justify-center gap-3 md:gap-4 max-h-[320px] overflow-y-auto pr-1">
+          <div className="flex flex-wrap justify-center gap-2 md:gap-4 max-h-[250px] md:max-h-[320px] overflow-y-auto pr-1">
             {carBrands.map((brand) => {
               const isSelected = selectedBrand === brand.name;
               return (
                 <button
                   key={brand.name}
                   onClick={() => setSelectedBrand(isSelected ? null : brand.name)}
-                  className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-300 w-24 md:w-28 ${
+                  className={`flex flex-col items-center justify-center p-2 md:p-3 rounded-xl md:rounded-2xl transition-all duration-300 w-20 md:w-28 ${
                     isSelected
                       ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30 scale-105 ring-2 ring-blue-400'
                       : 'bg-white/90 hover:bg-white text-slate-800 hover:shadow-md hover:-translate-y-0.5 border border-white/20'
                   }`}
                 >
-                  <div className="w-10 h-10 md:w-11 md:h-11 flex items-center justify-center mb-2">
+                  <div className="w-8 h-8 md:w-11 md:h-11 flex items-center justify-center mb-1 md:mb-2">
                     <img
                       src={brand.logo}
                       alt={brand.name}
@@ -282,7 +282,7 @@ export default function Catalog() {
                       }`}
                     />
                   </div>
-                  <span className="text-[11px] md:text-xs font-bold tracking-tight text-center truncate w-full">
+                  <span className="text-[9px] md:text-[11px] font-bold tracking-tight text-center truncate w-full">
                     {brand.name}
                   </span>
                 </button>
@@ -292,27 +292,27 @@ export default function Catalog() {
         </div>
 
         {/* BARRE DE FILTRES BUDGET / GAMME */}
-        <div className="flex flex-wrap justify-center gap-3 md:gap-6 mb-16">
+        <div className="flex flex-wrap justify-center gap-2 md:gap-6 mb-10 md:mb-16">
           {filters.map((f) => (
             <button
               key={f.name}
               onClick={() => setActiveFilter(f.name)}
-              className={`flex flex-col items-center flex-1 min-w-[110px] max-w-[160px] p-5 rounded-3xl border transition-all duration-300 ${
+              className={`flex flex-col items-center flex-1 min-w-[80px] max-w-[160px] p-3 md:p-5 rounded-2xl md:rounded-3xl border transition-all duration-300 ${
                 activeFilter === f.name 
                 ? "bg-[#fb201e] border-[#fb201e] shadow-[0_10px_30px_rgba(251,32,30,0.3)] scale-105" 
                 : "bg-[#111] border-white/5 hover:border-white/20"
               }`}
             >
-              <span className={`mb-2 ${activeFilter === f.name ? "text-white" : "text-[#fb201e]"}`}>{f.icon}</span>
-              <span className="text-[11px] font-black uppercase tracking-widest">{f.name}</span>
-              <span className={`text-[8px] font-bold mt-1 uppercase ${activeFilter === f.name ? "text-white/70" : "text-white/30"}`}>{f.desc}</span>
+              <span className={`mb-1.5 md:mb-2 ${activeFilter === f.name ? "text-white" : "text-[#fb201e]"}`}>{f.icon}</span>
+              <span className="text-[9px] md:text-[11px] font-black uppercase tracking-widest">{f.name}</span>
+              <span className={`text-[7px] md:text-[8px] font-bold mt-0.5 md:mt-1 uppercase ${activeFilter === f.name ? "text-white/70" : "text-white/30"}`}>{f.desc}</span>
             </button>
           ))}
         </div>
 
         {/* GRILLE DE RESULTATS */}
         {filteredItems.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-in fade-in duration-500">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 animate-in fade-in duration-500">
             {filteredItems.map((item) => (
               <CarCard 
                 key={item.id} 
@@ -322,8 +322,8 @@ export default function Catalog() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-20 bg-[#0a0a0a] rounded-[3rem] border border-white/5">
-            <p className="text-white/20 font-black italic text-2xl uppercase">Rien en stock pour vos critères</p>
+          <div className="text-center py-16 md:py-20 bg-[#0a0a0a] rounded-[2rem] md:rounded-[3rem] border border-white/5">
+            <p className="text-white/20 font-black italic text-xl md:text-2xl uppercase">Rien en stock pour vos critères</p>
           </div>
         )}
       </div>
