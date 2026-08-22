@@ -33,7 +33,7 @@ export default function Navbar() {
             <div className="relative">
               <div className="absolute -inset-2 bg-slate-900/5 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <img
-                src="/images/logo.jpg"
+                src="/images/logo.png"
                 alt="Vroom CI Logo"
                 className="w-12 h-12 md:w-14 md:h-14 object-contain relative transition-transform duration-500 group-hover:scale-105 group-hover:rotate-3"
               />
@@ -42,7 +42,7 @@ export default function Navbar() {
               <h1 className="font-bold text-[22px] md:text-[28px] text-orange-500 tracking-[-0.02em] leading-none">
                 Vroom<span className="text-green-500 font-light ml-0.5">CI</span>
               </h1>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-medium -mt-1 hidden md:block">Premium Auto</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-medium -mt-1 hidden md:block">Premium Auto</p>
             </div>
           </Link>
 

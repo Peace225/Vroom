@@ -21,6 +21,9 @@ const CarCard = ({ item, handleContactAdmin }) => {
   const conditionText = item.condition ? item.condition.toUpperCase() : 'NEUF';
   const isNeuf = conditionText.includes('NEUF');
 
+  // Génération du lien du logo local pour la carte
+ const brandLogoSrc = item.brandLogo || (item.brand ? `/images/logos/${item.brand.trim().toLowerCase().replace(/[^a-z0-9]/g, '')}.jpg` : null);
+
   return (
     <div className="bg-white text-slate-900 border border-slate-100 rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 group relative h-full flex flex-col">
       
@@ -38,9 +41,14 @@ const CarCard = ({ item, handleContactAdmin }) => {
           alt={item.model} 
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
         />
-        {item.brandLogo && (
+        {brandLogoSrc && (
           <div className="absolute top-3 right-3 md:top-4 md:right-4 w-7 h-7 md:w-9 md:h-9 bg-white rounded-full p-1 md:p-1.5 shadow-md flex items-center justify-center border border-slate-100">
-            <img src={item.brandLogo} alt={item.brand} className="max-w-full max-h-full object-contain" />
+            <img 
+              src={brandLogoSrc} 
+              alt={item.brand} 
+              onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }} // Cache le logo s'il n'existe pas en local
+              className="max-w-full max-h-full object-contain" 
+            />
           </div>
         )}
       </div>
@@ -129,14 +137,16 @@ export default function Catalog() {
     fetchData();
   }, []);
 
-  // --- EXTRACTION DYNAMIQUE DES MARQUES ---
+  // --- EXTRACTION DYNAMIQUE DES MARQUES (Modifiée pour les logos locaux) ---
   const carBrands = useMemo(() => {
     const brandsMap = {};
     cars.forEach(car => {
       if (car.brand) {
         const brandName = car.brand.trim();
         if (!brandsMap[brandName]) {
-          brandsMap[brandName] = car.brandLogo || `https://api.iconify.design/simple-icons:${brandName.toLowerCase().replace(/[^a-z0-9]/g, '')}.svg`;
+          const normalizedName = brandName.toLowerCase().replace(/[^a-z0-9]/g, '');
+          // On va chercher l'image dans le dossier /logos/
+         brandsMap[brandName] = car.brandLogo || `/images/logos/${normalizedName}.jpg`;
         }
       }
     });
@@ -277,6 +287,7 @@ export default function Catalog() {
                     <img
                       src={brand.logo}
                       alt={brand.name}
+                      onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }} // Cache l'image manquante
                       className={`max-w-full max-h-full object-contain transition-all ${
                         isSelected ? 'brightness-0 invert' : ''
                       }`}
