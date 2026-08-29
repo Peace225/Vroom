@@ -22,7 +22,7 @@ const CarCard = ({ item, handleContactAdmin }) => {
   const isNeuf = conditionText.includes('NEUF');
 
   // Génération du lien du logo local pour la carte
- const brandLogoSrc = item.brandLogo || (item.brand ? `/images/logos/${item.brand.trim().toLowerCase().replace(/[^a-z0-9]/g, '')}.jpg` : null);
+  const brandLogoSrc = item.brandLogo || (item.brand ? `/images/logos/${item.brand.trim().toLowerCase().replace(/[^a-z0-9]/g, '')}.jpg` : null);
 
   return (
     <div className="bg-white text-slate-900 border border-slate-100 rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 group relative h-full flex flex-col">
@@ -146,7 +146,7 @@ export default function Catalog() {
         if (!brandsMap[brandName]) {
           const normalizedName = brandName.toLowerCase().replace(/[^a-z0-9]/g, '');
           // On va chercher l'image dans le dossier /logos/
-         brandsMap[brandName] = car.brandLogo || `/images/logos/${normalizedName}.jpg`;
+          brandsMap[brandName] = car.brandLogo || `/images/logos/${normalizedName}.jpg`;
         }
       }
     });
@@ -211,7 +211,7 @@ export default function Catalog() {
 
   if (loading) return (
     <div className="min-h-screen bg-black flex flex-col justify-center items-center">
-      <Loader2 className="animate-spin text-[#fb201e] mb-4" size={40} className="md:w-12 md:h-12" />
+      <Loader2 className="animate-spin text-[#fb201e] mb-4 md:w-12 md:h-12" size={40} />
       <p className="text-white/20 font-black text-[10px] md:text-xs uppercase tracking-widest">Initialisation du catalogue...</p>
     </div>
   );
