@@ -202,10 +202,10 @@ export default function Catalog() {
   ];
 
   const handleContactAdmin = (item) => {
-    const adminWhatsApp = "2250151104839";
+    const adminWhatsApp = "2250544404780";
     const name = `${item.brand} ${item.model}`;
     const price = `(${item.price})`;
-    const msg = `Bonjour AutoLife, je souhaiterais des informations sur ce véhicule : ${name} ${price}.`;
+    const msg = `Bonjour VroomCI, je souhaiterais des informations sur ce véhicule : ${name} ${price}.`;
     window.open(`https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(msg)}`, '_blank');
   };
 

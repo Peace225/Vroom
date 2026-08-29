@@ -21,6 +21,7 @@ export default function Accueil() {
   const [searchResults, setSearchResults] = useState(null);
   const [selectedCar, setSelectedCar] = useState(null);
   const [selectedOffre, setSelectedOffre] = useState(null);
+  const [isLoading, setIsLoading] = useState(false); // Nouvel état de chargement
   const resultsRef = useRef(null);
 
   const [selections, setSelections] = useState({ Marques: "", Modèles: "", Localisation: "", Energie: "" });
@@ -47,8 +48,49 @@ export default function Accueil() {
     Energie: Zap
   };
 
-  const handleSearch = () => {
-    setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+  const handleSearch = async () => {
+    setIsLoading(true);
+    
+    try {
+      // 1. Construction des paramètres
+      const params = new URLSearchParams({
+        type: activeTab,
+        budget: budget.toString(),
+        annee_min: year.toString(),
+      });
+
+      if (isRental) {
+        if (rentalLocation) params.append("localisation", rentalLocation);
+        if (withDriver !== "Sans chauffeur") params.append("chauffeur", "true");
+        if (startDate) params.append("date_debut", startDate);
+        if (endDate) params.append("date_fin", endDate);
+      } else {
+        if (selections.Marques) params.append("marque", selections.Marques);
+        if (selections.Modèles) params.append("modele", selections.Modèles);
+        if (selections.Energie) params.append("energie", selections.Energie);
+        if (selections.Localisation) params.append("localisation", selections.Localisation);
+      }
+
+      // 2. Appel API (À remplacer par votre endpoint réel ou votre logique Supabase/Firebase)
+      const response = await fetch(`/api/vehicules?${params.toString()}`);
+      
+      if (!response.ok) {
+        throw new Error("Erreur lors de la récupération des données");
+      }
+      
+      const data = await response.json();
+
+      // 3. Mise à jour des résultats
+      setSearchResults(data);
+
+      // 4. Défilement vers les résultats
+      setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+      
+    } catch (error) {
+      console.error("Erreur de recherche:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const CarCard = ({ car }) => (
@@ -221,9 +263,21 @@ export default function Accueil() {
 
                     <button
                       onClick={handleSearch}
-                      className="w-full mt-2 sm:mt-4 bg-slate-900 hover:bg-black text-white rounded-none py-3.5 sm:py-4 font-semibold text-[13px] sm:text-[14px] flex items-center justify-center gap-2.5 transition-all duration-300 hover:shadow-xl active:scale-[0.98]"
+                      disabled={isLoading}
+                      className={`w-full mt-2 sm:mt-4 rounded-none py-3.5 sm:py-4 font-semibold text-[13px] sm:text-[14px] flex items-center justify-center gap-2.5 transition-all duration-300 hover:shadow-xl active:scale-[0.98] ${
+                        isLoading ? "bg-slate-400 text-white cursor-not-allowed" : "bg-slate-900 hover:bg-black text-white"
+                      }`}
                     >
-                      <Search size={18} /> Rechercher un véhicule
+                      {isLoading ? (
+                        <span className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          Recherche en cours...
+                        </span>
+                      ) : (
+                        <>
+                          <Search size={18} /> Rechercher un véhicule
+                        </>
+                      )}
                     </button>
                   </div>
                 ) : (
@@ -289,9 +343,21 @@ export default function Accueil() {
 
                     <button
                       onClick={handleSearch}
-                      className="w-full mt-2 sm:mt-4 bg-orange-500 hover:bg-orange-600 text-white rounded-none py-3.5 sm:py-4 font-semibold text-[13px] sm:text-[14px] flex items-center justify-center gap-2.5 transition-all duration-300 hover:shadow-xl active:scale-[0.98]"
+                      disabled={isLoading}
+                      className={`w-full mt-2 sm:mt-4 rounded-none py-3.5 sm:py-4 font-semibold text-[13px] sm:text-[14px] flex items-center justify-center gap-2.5 transition-all duration-300 hover:shadow-xl active:scale-[0.98] ${
+                        isLoading ? "bg-slate-400 text-white cursor-not-allowed" : "bg-orange-500 hover:bg-orange-600 text-white"
+                      }`}
                     >
-                      <Search size={18} /> Voir les véhicules disponibles
+                      {isLoading ? (
+                        <span className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          Recherche en cours...
+                        </span>
+                      ) : (
+                        <>
+                          <Search size={18} /> Voir les véhicules disponibles
+                        </>
+                      )}
                     </button>
                   </div>
                 )}
@@ -334,7 +400,7 @@ export default function Accueil() {
       </section>
       
       <VehicleCategorySearch />
-      <VehicleListingSection searchResults={searchResults} setSelectedCar={setSelectedCar} setSelectedOffre={setSelectedOffre} />
+      <VehicleListingSection searchResults={searchResults} setSelectedCar={setSelectedCar} setSelectedOffre={setSelectedOffre} ref={resultsRef} />
       <Catalog />
 
       <ExitPopup />

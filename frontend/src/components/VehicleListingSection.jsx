@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../supabaseClient';
 
 // --- Icônes Vectorielles (SVG) ---
 const HeartIcon = ({ filled }) => (
@@ -49,7 +50,6 @@ const ChevronRightIcon = () => (
   </svg>
 );
 
-// Icône WhatsApp ajoutée pour le bouton
 const WhatsAppIcon = () => (
   <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
@@ -160,7 +160,6 @@ const mockVehicles = [
 ];
 
 // --- Composant d'une Carte de Véhicule ---
-// Ajout de la prop "onReserve"
 const VehicleCard = ({ car, isFav, toggleFavorite, onSelectCar, onReserve }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -192,6 +191,7 @@ const VehicleCard = ({ car, isFav, toggleFavorite, onSelectCar, onReserve }) => 
 
           {/* Contrôles du Carrousel (Flèches) */}
           <button 
+            type="button"
             onClick={prevImage} 
             className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white p-1.5 rounded-full opacity-0 group-hover/carousel:opacity-100 transition-all duration-200 z-20 backdrop-blur-sm"
           >
@@ -199,6 +199,7 @@ const VehicleCard = ({ car, isFav, toggleFavorite, onSelectCar, onReserve }) => 
           </button>
           
           <button 
+            type="button"
             onClick={nextImage} 
             className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white p-1.5 rounded-full opacity-0 group-hover/carousel:opacity-100 transition-all duration-200 z-20 backdrop-blur-sm"
           >
@@ -232,10 +233,11 @@ const VehicleCard = ({ car, isFav, toggleFavorite, onSelectCar, onReserve }) => 
             </div>
 
             <div className="flex items-center gap-1">
-              <button className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+              <button type="button" className="p-2 hover:bg-slate-100 rounded-full transition-colors">
                 <ShareIcon />
               </button>
               <button
+                type="button"
                 onClick={() => toggleFavorite(car.id)}
                 className="p-2 hover:bg-slate-100 rounded-full transition-colors"
               >
@@ -279,14 +281,15 @@ const VehicleCard = ({ car, isFav, toggleFavorite, onSelectCar, onReserve }) => 
 
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={() => onSelectCar(car)}
             className="flex-1 py-2.5 bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold text-xs rounded-xl transition-all duration-200 flex items-center justify-center gap-2 border border-slate-200"
           >
             <span>Détails</span>
           </button>
           
-          {/* BOUTON WHATSAPP DE LA CARTE */}
           <button
+            type="button"
             onClick={onReserve}
             className="flex-1 py-2.5 bg-[#25D366] hover:bg-[#1ebd5b] text-white font-bold text-xs rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2"
           >
@@ -305,16 +308,77 @@ export default function VehicleRentalSection() {
   const [favorites, setFavorites] = useState([]);
   const [selectedCar, setSelectedCar] = useState(null);
 
+  // 1. On initialise l'état directement avec mockVehicles pour qu'ils s'affichent immédiatement
+  const [vehicles, setVehicles] = useState(mockVehicles);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchVehicles();
+  }, []);
+
+ async function fetchVehicles() {
+    try {
+      setIsLoading(true);
+      
+      const { data, error } = await supabase
+        .from('cars')
+        .select('*');
+
+      if (error) throw error;
+      
+      if (data) {
+        const formattedData = data.map((car) => {
+          // 1. Traitement des images depuis le JSONB Supabase
+          // La BDD renvoie un objet type {"back": null, "front": "https://..."}
+          let carImages = [];
+          if (car.images && typeof car.images === 'object') {
+            // On extrait toutes les valeurs de l'objet et on ne garde que les URLs valides (non nulles)
+            carImages = Object.values(car.images).filter(val => val !== null && val !== '');
+          }
+          
+          // Image par défaut si aucune image valide n'est trouvée dans le JSON
+          if (carImages.length === 0) {
+            carImages = ['/images/voitures/default.jpg'];
+          }
+
+          // 2. Formatage complet du véhicule
+          return {
+            id: car.id,
+            name: `${car.brand || ''} ${car.model || ''}`.trim(),
+            year: car.year || new Date(car.created_at).getFullYear(),
+            pricePerDay: parseInt(car.price, 10) || 0,
+            transmission: car.transmission || 'Non spécifié',
+            fuel: car.fuel || 'Non spécifié',
+            hasDriver: car.has_driver || false,
+            images: carImages,
+            // Création d'une description par défaut basée sur la catégorie et la localisation
+            description: `Véhicule de catégorie ${car.category || 'Standard'} disponible à ${car.location || 'Abidjan'}.`,
+            caution: parseFloat(car.caution) || 0,
+          };
+        });
+
+        // Met à jour l'état (ici on garde vos mockVehicles pour l'exemple, 
+        // vous pouvez retirer "...mockVehicles" si vous ne voulez QUE les données de la base)
+        setVehicles([...mockVehicles, ...formattedData]);
+      }
+    } catch (error) {
+      console.error("Erreur de chargement des véhicules Supabase :", error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  // Le filtrage se fait maintenant sur le tableau fusionné (retrait de la déclaration en doublon)
+  const filteredVehicles = vehicles.filter((car) => {
+    if (filter === 'WITHOUT_DRIVER') return !car.hasDriver;
+    if (filter === 'WITH_DRIVER') return car.hasDriver;
+    return true;
+  });
+
   // Fonction pour générer le lien et ouvrir WhatsApp
   const handleWhatsAppReservation = (car) => {
-    // Remplacer par le vrai numéro au format international (sans le +)
     const adminWhatsApp = "2250544404780"; // Numéro international sans +
-    const message = `Bonjour AutoLife, je souhaite réserver le véhicule suivant en location :
-- Modèle : ${car.name} (${car.year})
-- Tarif : ${car.pricePerDay.toLocaleString('fr-FR')} FCFA / jour
-- Formule : ${car.hasDriver ? 'Avec chauffeur' : 'Sans chauffeur'}
-
-Pourriez-vous me confirmer sa disponibilité ?`;
+    const message = `Bonjour AutoLife, je souhaite réserver le véhicule suivant en location :\n- Modèle : ${car.name} (${car.year})\n- Tarif : ${car.pricePerDay.toLocaleString('fr-FR')} FCFA / jour\n- Formule : ${car.hasDriver ? 'Avec chauffeur' : 'Sans chauffeur'}\n\nPourriez-vous me confirmer sa disponibilité ?`;
     
     const whatsappUrl = `https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -325,12 +389,6 @@ Pourriez-vous me confirmer sa disponibilité ?`;
       prev.includes(id) ? prev.filter((favId) => favId !== id) : [...prev, id]
     );
   };
-
-  const filteredVehicles = mockVehicles.filter((car) => {
-    if (filter === 'WITHOUT_DRIVER') return !car.hasDriver;
-    if (filter === 'WITH_DRIVER') return car.hasDriver;
-    return true;
-  });
 
   return (
     <section className="relative py-12 md:py-16 px-4 md:px-8 font-sans overflow-hidden min-h-screen flex items-center">
@@ -373,6 +431,7 @@ Pourriez-vous me confirmer sa disponibilité ?`;
         {/* Barre de filtre */}
         <div className="flex items-center gap-2.5 mb-8 md:mb-10 pb-4 overflow-x-auto scrollbar-none">
           <button
+            type="button"
             onClick={() => setFilter('ALL')}
             className={`px-5 py-2.5 text-xs md:text-sm font-semibold rounded-full transition-all whitespace-nowrap backdrop-blur-md ${
               filter === 'ALL'
@@ -380,10 +439,11 @@ Pourriez-vous me confirmer sa disponibilité ?`;
                 : 'bg-slate-900/60 text-slate-300 hover:bg-slate-800/80 border border-white/10'
             }`}
           >
-            Toutes les voitures ({mockVehicles.length})
+            Toutes les voitures ({vehicles.length})
           </button>
 
           <button
+            type="button"
             onClick={() => setFilter('WITHOUT_DRIVER')}
             className={`px-5 py-2.5 text-xs md:text-sm font-semibold rounded-full transition-all whitespace-nowrap backdrop-blur-md ${
               filter === 'WITHOUT_DRIVER'
@@ -395,6 +455,7 @@ Pourriez-vous me confirmer sa disponibilité ?`;
           </button>
 
           <button
+            type="button"
             onClick={() => setFilter('WITH_DRIVER')}
             className={`px-5 py-2.5 text-xs md:text-sm font-semibold rounded-full transition-all whitespace-nowrap backdrop-blur-md ${
               filter === 'WITH_DRIVER'
@@ -415,7 +476,7 @@ Pourriez-vous me confirmer sa disponibilité ?`;
               isFav={favorites.includes(car.id)}
               toggleFavorite={toggleFavorite}
               onSelectCar={setSelectedCar}
-              onReserve={() => handleWhatsAppReservation(car)} // Passage de la fonction
+              onReserve={() => handleWhatsAppReservation(car)}
             />
           ))}
         </div>
@@ -428,6 +489,7 @@ Pourriez-vous me confirmer sa disponibilité ?`;
           <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[95vh] md:max-h-[90vh] overflow-hidden shadow-2xl border border-slate-100 flex flex-col md:flex-row relative">
             
             <button
+              type="button"
               onClick={() => setSelectedCar(null)}
               className="absolute top-3 right-3 md:top-4 md:right-4 w-8 h-8 md:w-9 md:h-9 bg-white/90 md:bg-slate-100 hover:bg-white md:hover:bg-slate-200 text-slate-700 rounded-full flex items-center justify-center transition-all font-bold text-sm z-30 shadow-md backdrop-blur-sm md:backdrop-blur-none"
             >
@@ -513,15 +575,17 @@ Pourriez-vous me confirmer sa disponibilité ?`;
               {/* Actions du Modal - BOUTON WHATSAPP DE LA MODALE */}
               <div className="flex flex-col-reverse sm:flex-row gap-2.5 sm:gap-3 pt-5 mt-auto sm:mt-6 border-t border-slate-100">
                 <button
+                  type="button"
                   onClick={() => setSelectedCar(null)}
                   className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all"
                 >
                   Fermer
                 </button>
                 <button
+                  type="button"
                   onClick={() => {
-                    handleWhatsAppReservation(selectedCar); // Déclenchement WhatsApp
-                    setSelectedCar(null); // Optionnel : Fermer la modal après l'envoi
+                    handleWhatsAppReservation(selectedCar);
+                    setSelectedCar(null);
                   }}
                   className="flex-1 py-3 bg-[#25D366] hover:bg-[#1ebd5b] text-white font-bold text-xs rounded-xl shadow-lg shadow-green-600/30 transition-all flex items-center justify-center gap-2"
                 >

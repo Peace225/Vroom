@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebaseConfig";
+import { supabase } from "../supabaseClient";
 import { Link, useNavigate } from "react-router-dom";
 import { LogIn, Mail, Lock, ArrowRight, AlertCircle, Eye, EyeOff } from "lucide-react";
 
@@ -12,18 +11,28 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  // --- CONNEXION STRICTE (EMAIL/MOT DE PASSE) ---
+  // --- CONNEXION STRICTE SUPABASE (EMAIL/MOT DE PASSE) ---
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate("/dashboard");
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // CORRECTIF : Force le rechargement complet de la page vers le Dashboard
+      // Cela permet de s'assurer que le composant de sécurité détecte bien la connexion
+      window.location.href = "/dashboard";
+      
     } catch (err) {
-      // On reste volontairement vague sur l'erreur exacte par sécurité
-      // (Ne pas dire si c'est l'email ou le mot de passe qui est faux)
+      console.error("Erreur Supabase :", err.message);
       setError("Accès refusé. Identifiants incorrects.");
     } finally {
       setIsLoading(false);

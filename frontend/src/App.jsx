@@ -11,6 +11,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Catalog from "./components/Catalog";
 import CarDetails from "./components/CarDetails";
+import ProtectedRoute from "./components/ProtectedRoute"; // <-- Import ajouté ici
 
 // Composant pour l'importation de données
 import ImportData from "./components/ImportData"; 
@@ -33,7 +34,17 @@ export default function App() {
           
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<AdminDashboard />} />
+          
+          {/* Route protégée pour le Dashboard : impossible d'y accéder sans être connecté */}
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          
           <Route path="/catalogue" element={<Catalog />} />
           
           {/* Route temporaire pour importer vos voitures */}
