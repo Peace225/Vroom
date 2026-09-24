@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import VehicleDetail from './VehicleDetail';
+import { supabaseSales as supabase } from '../supabaseClient';
 
 // --- Icônes Vectorielles (SVG) ---
 const HeartIcon = ({ filled }) => (
@@ -45,6 +46,7 @@ const WhatsAppIcon = () => (
   </svg>
 );
 
+// Liste statique des marques pour le filtre
 const carBrands = [
   { name: 'Acura', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/5e/Acura_logo.svg' },
   { name: 'Changan', logo: 'https://upload.wikimedia.org/wikipedia/commons/8/85/Changan_Automobile_logo.svg' },
@@ -78,24 +80,69 @@ const carBrands = [
   { name: 'Volkswagen', logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a1/Volkswagen_Logo_till_1995.svg' }
 ];
 
-const mockVehicles = [
-  { id: 1, name: 'Kia Pegas', year: 2024, price: 8500000, transmission: 'Manuelle', fuel: 'Essence', condition: 'Neuf', brandLogo: 'https://upload.wikimedia.org/wikipedia/commons/4/47/KIA_logo2021.svg', image: 'https://images.unsplash.com/photo-1590362891991-f776e747a588?auto=format&fit=crop&w=600&q=80', certified: true, inspected: true, warranty: '2 Ans' },
-  { id: 2, name: 'Toyota Vitz', year: 2019, price: 4500000, transmission: 'Automatique', fuel: 'Essence', condition: 'Occasion', brandLogo: 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Toyota_carlogo.svg', image: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=600&q=80', certified: true, inspected: true, warranty: '6 Mois' },
-  { id: 3, name: 'Suzuki S-Presso', year: 2024, price: 6500000, transmission: 'Manuelle', fuel: 'Essence', condition: 'Neuf', brandLogo: 'https://upload.wikimedia.org/wikipedia/commons/1/12/Suzuki_logo_2015.svg', image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=600&q=80', certified: true, inspected: true, warranty: '2 Ans' },
-  { id: 4, name: 'Toyota RAV4', year: 2021, price: 18000000, transmission: 'Automatique', fuel: 'Essence', condition: 'Occasion', brandLogo: 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Toyota_carlogo.svg', image: 'https://images.unsplash.com/photo-1626668893632-6f3a4466d22f?auto=format&fit=crop&w=600&q=80', certified: true, inspected: true, warranty: '1 An' },
-  { id: 5, name: 'Hyundai Tucson', year: 2024, price: 25000000, transmission: 'Automatique', fuel: 'Diesel', condition: 'Neuf', brandLogo: 'https://upload.wikimedia.org/wikipedia/commons/4/44/Hyundai_Motor_Company_logo.svg', image: 'https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=600&q=80', certified: true, inspected: true, warranty: '3 Ans' },
-  { id: 6, name: 'Peugeot 3008', year: 2020, price: 14000000, transmission: 'Automatique', fuel: 'Diesel', condition: 'Occasion', brandLogo: 'https://upload.wikimedia.org/wikipedia/commons/f/f7/Peugeot_Logo.svg', image: 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&w=600&q=80', certified: true, inspected: true, warranty: '6 Mois' },
-  { id: 7, name: 'Mercedes-Benz Classe C', year: 2024, price: 45000000, transmission: 'Automatique', fuel: 'Essence', condition: 'Neuf', brandLogo: 'https://upload.wikimedia.org/wikipedia/commons/9/90/Mercedes-Logo.svg', image: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=600&q=80', certified: true, inspected: true, warranty: '2 Ans' },
-  { id: 8, name: 'Nissan Qashqai', year: 2018, price: 9500000, transmission: 'Automatique', fuel: 'Essence', condition: 'Occasion', brandLogo: 'https://upload.wikimedia.org/wikipedia/commons/8/8c/Nissan_logo.svg', image: 'https://images.unsplash.com/photo-1570733117311-d990c3816c47?auto=format&fit=crop&w=600&q=80', certified: true, inspected: true, warranty: '6 Mois' },
-  { id: 9, name: 'Mitsubishi L200', year: 2024, price: 22000000, transmission: 'Manuelle', fuel: 'Diesel', condition: 'Neuf', brandLogo: 'https://upload.wikimedia.org/wikipedia/commons/5/5a/Mitsubishi_logo.svg', image: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=600&q=80', certified: true, inspected: true, warranty: '3 Ans' },
-  { id: 10, name: 'Toyota Corolla', year: 2017, price: 6000000, transmission: 'Manuelle', fuel: 'Essence', condition: 'Occasion', brandLogo: 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Toyota_carlogo.svg', image: 'https://images.unsplash.com/photo-1559416523-140ddc3d238c?auto=format&fit=crop&w=600&q=80', certified: true, inspected: true, warranty: '3 Mois' },
-];
-
 export default function VehicleSalesSection() {
   const [filter, setFilter] = useState('ALL');
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [favorites, setFavorites] = useState([]);
   const [selectedVehicleForDetail, setSelectedVehicleForDetail] = useState(null);
+  
+  // États pour les données Supabase
+  const [vehicles, setVehicles] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Chargement des données depuis la base de données de vente
+  useEffect(() => {
+    fetchSalesVehicles();
+  }, []);
+
+  async function fetchSalesVehicles() {
+    try {
+      setIsLoading(true);
+      
+      const { data, error } = await supabase
+        .from('cars')
+        .select('*');
+
+      if (error) throw error;
+      
+      if (data) {
+        const formattedData = data.map((car) => {
+          // Traitement sécurisé des images depuis le JSONB Supabase
+          let carImages = [];
+          if (car.images && typeof car.images === 'object') {
+            carImages = Object.values(car.images).filter(val => val !== null && val !== '');
+          }
+          
+          if (carImages.length === 0) {
+            carImages = ['/images/voitures/default.jpg'];
+          }
+
+          // Formatage du véhicule pour la vente
+          return {
+            id: car.id,
+            name: `${car.brand || ''} ${car.model || ''}`.trim(),
+            brand: car.brand || '', // Utile pour le filtre par marque
+            year: car.year || new Date(car.created_at).getFullYear(),
+            price: parseInt(car.price, 10) || 0,
+            transmission: car.transmission || 'Non spécifié',
+            fuel: car.fuel || 'Non spécifié',
+            condition: car.condition || 'Occasion', // Neuf ou Occasion
+            images: carImages,
+            // On utilise la première image de la liste comme image principale pour la carte
+            image: carImages[0], 
+            description: car.description || `Véhicule ${car.brand} ${car.model} disponible à la vente.`,
+            warranty: car.warranty || 'Non spécifiée',
+          };
+        });
+
+        setVehicles(formattedData);
+      }
+    } catch (error) {
+      console.error("Erreur de chargement des véhicules de vente :", error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   const toggleFavorite = (id) => {
     setFavorites((prev) =>
@@ -103,30 +150,36 @@ export default function VehicleSalesSection() {
     );
   };
 
-  const filteredVehicles = mockVehicles.filter((car) => {
+  // Filtrage combiné (État du véhicule + Marque)
+  const filteredVehicles = vehicles.filter((car) => {
     const conditionMatch =
       filter === 'ALL' ||
-      (filter === 'OCCASION' && car.condition === 'Occasion') ||
-      (filter === 'NEUF' && car.condition === 'Neuf');
+      (filter === 'OCCASION' && car.condition.toLowerCase() === 'occasion') ||
+      (filter === 'NEUF' && car.condition.toLowerCase() === 'neuf');
 
     const brandMatch = selectedBrand
-      ? car.name.toLowerCase().includes(selectedBrand.toLowerCase())
+      ? car.brand.toLowerCase() === selectedBrand.toLowerCase()
       : true;
 
     return conditionMatch && brandMatch;
   });
   
-  // Fonction pour générer le lien et ouvrir WhatsApp (même que pour la location)
+  // Fonction pour générer le lien et ouvrir WhatsApp
   const handleWhatsAppReservation = (car, e) => {
-    // Empêcher la propagation pour ne pas ouvrir les détails
     if(e) e.stopPropagation();
     
-    // NOUVEAU NUMÉRO ICI
-    const adminWhatsApp = "2250544404780"; // Remplacez par le numéro désiré
+    const adminWhatsApp = "2250544404780"; 
     const message = `Bonjour VroomCI, je suis intéressé par l'achat du véhicule suivant :\n- Modèle : ${car.name} (${car.year})\n- Prix : ${car.price.toLocaleString('fr-FR')} FCFA\n- État : ${car.condition}\n\nPourriez-vous me donner plus d'informations ?`;
     
     const whatsappUrl = `https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
+  };
+
+  // Trouver le logo de la marque pour une voiture donnée
+  const getBrandLogo = (brandName) => {
+    if (!brandName) return null;
+    const brand = carBrands.find(b => b.name.toLowerCase() === brandName.toLowerCase());
+    return brand ? brand.logo : null; // Vous pourriez retourner un logo par défaut ici
   };
 
   if (selectedVehicleForDetail) {
@@ -258,122 +311,137 @@ export default function VehicleSalesSection() {
           </div>
         </div>
 
-        {/* Grille des cartes véhicules */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          {filteredVehicles.map((car) => {
-            const isFav = favorites.includes(car.id);
+        {/* Affichage : Grille ou Indicateur de chargement */}
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="w-10 h-10 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+            <p className="text-white font-medium">Chargement du showroom...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {filteredVehicles.length > 0 ? (
+              filteredVehicles.map((car) => {
+                const isFav = favorites.includes(car.id);
+                const brandLogo = getBrandLogo(car.brand);
 
-            return (
-              <div
-                key={car.id}
-                onClick={() => setSelectedVehicleForDetail(car)}
-                className="group bg-white/95 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden shadow-xl hover:shadow-2xl hover:border-blue-300 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between cursor-pointer"
-              >
-                <div>
-                  <div className="relative aspect-[16/10] bg-slate-100 overflow-hidden">
-                    <img
-                      src={car.image}
-                      alt={`${car.name} ${car.year}`}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-slate-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
-                      <span className="text-white bg-white/20 backdrop-blur-md border border-white/30 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-[10px] md:text-xs font-bold shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                        Voir les détails &gt;
-                      </span>
-                    </div>
-
-                    <span
-                      className={`absolute top-2 left-2 md:top-3 md:left-3 text-white text-[9px] md:text-[10px] tracking-wider uppercase font-bold px-2 py-1 md:px-2.5 md:py-1 rounded-md md:rounded-lg backdrop-blur-md shadow-sm border border-white/10 ${
-                        car.condition === 'Neuf'
-                          ? 'bg-emerald-600/90'
-                          : 'bg-slate-900/80'
-                      }`}
-                    >
-                      {car.condition}
-                    </span>
-
-                    <div className="absolute bottom-2 right-2 md:bottom-3 md:right-3 w-8 h-8 md:w-10 md:h-10 bg-white/95 rounded-lg md:rounded-xl p-1.5 md:p-2 shadow-md backdrop-blur-sm flex items-center justify-center border border-slate-100">
-                      <img
-                        src={car.brandLogo}
-                        alt="Brand logo"
-                        className="max-w-full max-h-full object-contain"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="p-4 md:p-5">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="text-sm md:text-base font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
-                        {car.name}{' '}
-                        <span className="text-slate-400 font-normal">({car.year})</span>
-                      </h3>
-
-                      <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                        <button className="p-1 hover:bg-slate-100 rounded-full transition-colors">
-                          <ShareIcon />
-                        </button>
-                        <button
-                          onClick={() => toggleFavorite(car.id)}
-                          className="p-1 hover:bg-slate-100 rounded-full transition-colors"
-                        >
-                          <HeartIcon filled={isFav} />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="mt-2 md:mt-3">
-                      <span className="text-xl md:text-2xl font-black text-blue-600 tracking-tight">
-                        {car.price.toLocaleString('fr-FR')}
-                      </span>
-                      <span className="text-[10px] md:text-xs font-bold text-blue-800 ml-1">FCFA</span>
-                    </div>
-
-                    <div className="flex items-center gap-3 md:gap-4 mt-3 md:mt-4 pt-2 md:pt-3 border-t border-slate-100 text-[10px] md:text-xs font-medium text-slate-600">
-                      <div className="flex items-center gap-1 md:gap-1.5">
-                        <TransmissionIcon />
-                        <span>{car.transmission}</span>
-                      </div>
-                      <div className="flex items-center gap-1 md:gap-1.5">
-                        <FuelIcon />
-                        <span>{car.fuel}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="px-4 pb-4 md:px-5 md:pb-5 pt-1 md:pt-2 flex flex-col gap-2.5 md:gap-3">
-                  <div className="flex flex-wrap items-center justify-center md:justify-between gap-x-2 gap-y-1 text-[9px] md:text-[11px] font-semibold text-emerald-600 bg-emerald-50/70 px-2.5 py-1.5 md:px-3 rounded-lg border border-emerald-100/50">
-                    <div className="flex items-center gap-1">
-                      <CheckBadgeIcon />
-                      <span>Certifiée</span>
-                    </div>
-                    <span className="hidden md:inline text-emerald-300">•</span>
-                    <div className="flex items-center gap-1">
-                      <CheckBadgeIcon />
-                      <span>Inspectée</span>
-                    </div>
-                    <span className="hidden md:inline text-emerald-300">•</span>
-                    <div className="flex items-center gap-1">
-                      <CheckBadgeIcon />
-                      <span>Garantie {car.warranty}</span>
-                    </div>
-                  </div>
-
-                  {/* BOUTON MODIFIÉ POUR APPELER WHATSAPP */}
-                  <button 
-                    onClick={(e) => handleWhatsAppReservation(car, e)}
-                    className="w-full py-2 md:py-2.5 bg-[#25D366] hover:bg-[#1ebd5b] text-white font-bold text-[11px] md:text-xs rounded-lg md:rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2"
+                return (
+                  <div
+                    key={car.id}
+                    onClick={() => setSelectedVehicleForDetail(car)}
+                    className="group bg-white/95 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden shadow-xl hover:shadow-2xl hover:border-blue-300 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between cursor-pointer"
                   >
-                    <WhatsAppIcon />
-                    <span>Contacter pour achat</span>
-                  </button>
-                </div>
+                    <div>
+                      <div className="relative aspect-[16/10] bg-slate-100 overflow-hidden">
+                        <img
+                          src={car.image}
+                          alt={`${car.name} ${car.year}`}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
 
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-slate-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
+                          <span className="text-white bg-white/20 backdrop-blur-md border border-white/30 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-[10px] md:text-xs font-bold shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                            Voir les détails &gt;
+                          </span>
+                        </div>
+
+                        <span
+                          className={`absolute top-2 left-2 md:top-3 md:left-3 text-white text-[9px] md:text-[10px] tracking-wider uppercase font-bold px-2 py-1 md:px-2.5 md:py-1 rounded-md md:rounded-lg backdrop-blur-md shadow-sm border border-white/10 ${
+                            car.condition.toLowerCase() === 'neuf'
+                              ? 'bg-emerald-600/90'
+                              : 'bg-slate-900/80'
+                          }`}
+                        >
+                          {car.condition}
+                        </span>
+
+                        {brandLogo && (
+                          <div className="absolute bottom-2 right-2 md:bottom-3 md:right-3 w-8 h-8 md:w-10 md:h-10 bg-white/95 rounded-lg md:rounded-xl p-1.5 md:p-2 shadow-md backdrop-blur-sm flex items-center justify-center border border-slate-100">
+                            <img
+                              src={brandLogo}
+                              alt="Brand logo"
+                              className="max-w-full max-h-full object-contain"
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="p-4 md:p-5">
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="text-sm md:text-base font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                            {car.name}{' '}
+                            <span className="text-slate-400 font-normal">({car.year})</span>
+                          </h3>
+
+                          <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                            <button className="p-1 hover:bg-slate-100 rounded-full transition-colors">
+                              <ShareIcon />
+                            </button>
+                            <button
+                              onClick={() => toggleFavorite(car.id)}
+                              className="p-1 hover:bg-slate-100 rounded-full transition-colors"
+                            >
+                              <HeartIcon filled={isFav} />
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="mt-2 md:mt-3">
+                          <span className="text-xl md:text-2xl font-black text-blue-600 tracking-tight">
+                            {car.price.toLocaleString('fr-FR')}
+                          </span>
+                          <span className="text-[10px] md:text-xs font-bold text-blue-800 ml-1">FCFA</span>
+                        </div>
+
+                        <div className="flex items-center gap-3 md:gap-4 mt-3 md:mt-4 pt-2 md:pt-3 border-t border-slate-100 text-[10px] md:text-xs font-medium text-slate-600">
+                          <div className="flex items-center gap-1 md:gap-1.5">
+                            <TransmissionIcon />
+                            <span>{car.transmission}</span>
+                          </div>
+                          <div className="flex items-center gap-1 md:gap-1.5">
+                            <FuelIcon />
+                            <span>{car.fuel}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="px-4 pb-4 md:px-5 md:pb-5 pt-1 md:pt-2 flex flex-col gap-2.5 md:gap-3">
+                      <div className="flex flex-wrap items-center justify-center md:justify-between gap-x-2 gap-y-1 text-[9px] md:text-[11px] font-semibold text-emerald-600 bg-emerald-50/70 px-2.5 py-1.5 md:px-3 rounded-lg border border-emerald-100/50">
+                        <div className="flex items-center gap-1">
+                          <CheckBadgeIcon />
+                          <span>Certifiée</span>
+                        </div>
+                        <span className="hidden md:inline text-emerald-300">•</span>
+                        <div className="flex items-center gap-1">
+                          <CheckBadgeIcon />
+                          <span>Inspectée</span>
+                        </div>
+                        <span className="hidden md:inline text-emerald-300">•</span>
+                        <div className="flex items-center gap-1">
+                          <CheckBadgeIcon />
+                          <span>Garantie {car.warranty}</span>
+                        </div>
+                      </div>
+
+                      <button 
+                        onClick={(e) => handleWhatsAppReservation(car, e)}
+                        className="w-full py-2 md:py-2.5 bg-[#25D366] hover:bg-[#1ebd5b] text-white font-bold text-[11px] md:text-xs rounded-lg md:rounded-xl shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2"
+                      >
+                        <WhatsAppIcon />
+                        <span>Contacter pour achat</span>
+                      </button>
+                    </div>
+
+                  </div>
+                );
+              })
+            ) : (
+              <div className="col-span-full text-center py-12 text-slate-400 bg-slate-900/40 rounded-2xl border border-white/10 backdrop-blur-md">
+                Aucun véhicule ne correspond à ces critères pour le moment.
               </div>
-            );
-          })}
-        </div>
+            )}
+          </div>
+        )}
 
       </div>
     </section>

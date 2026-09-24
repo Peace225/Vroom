@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { supabase } from "../supabaseClient";
+// L'import a été mis à jour ici pour correspondre à notre nouvelle configuration
+import { supabaseRental as supabase } from "../supabaseClient";
 import { Link, useNavigate } from "react-router-dom";
 import { LogIn, Mail, Lock, ArrowRight, AlertCircle, Eye, EyeOff } from "lucide-react";
 

@@ -4,12 +4,8 @@ import {
   Truck, Car, MessageSquare, Zap, Activity, ExternalLink, Flame, Trophy 
 } from 'lucide-react';
 
-// FIREBASE
-import { db } from '../firebaseConfig';
-import { collection, query, orderBy, onSnapshot, limit } from 'firebase/firestore';
-
-// SUPABASE
-import { supabase } from '../supabaseClient';
+// SUPABASE (Mis à jour pour utiliser le client configuré)
+import { supabaseRental as supabase } from '../supabaseClient';
 
 // COMPONENTS
 import Sidebar from '../components/Sidebar'; 
@@ -29,28 +25,39 @@ export default function AdminDashboard() {
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
-    // Sync Voitures
-    const unsubCars = onSnapshot(query(collection(db, "cars"), orderBy("createdAt", "desc")), (snap) => {
-      setCars(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-      setIsLoading(false);
-    });
-
-    // Sync Engins
-    const unsubEngins = onSnapshot(query(collection(db, "heavy_vehicles"), orderBy("createdAt", "desc")), (snap) => {
-      setHeavyVehicles(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    });
-
-    // Sync Traction (Derniers clics WhatsApp)
-    const unsubMsgs = onSnapshot(query(collection(db, "messages"), orderBy("timestamp", "desc"), limit(6)), (snap) => {
-      setMessages(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    });
-
-    return () => { 
-      unsubCars(); 
-      unsubEngins(); 
-      unsubMsgs(); 
-    };
+    fetchDashboardData();
   }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setIsLoading(true);
+      // Récupération des voitures depuis Supabase
+      const { data: carsData, error: carsError } = await supabase
+        .from('cars')
+        .select('*');
+
+      if (carsError) throw carsError;
+
+      if (carsData) {
+        const formattedCars = carsData.map(car => ({
+          id: car.id,
+          name: `${car.brand || ''} ${car.model || ''}`.trim(),
+          brand: car.brand || '',
+          model: car.model || '',
+          price: car.price || 0,
+          category: car.category || 'Disponible',
+          offer: car.offer || 'Gold',
+          availability: car.availability || 'Disponible',
+          images: car.images || {}
+        }));
+        setCars(formattedCars);
+      }
+    } catch (err) {
+      console.error("Erreur de chargement du dashboard :", err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Déconnexion via Supabase sécurisée
   const handleLogout = async () => {
@@ -177,7 +184,7 @@ export default function AdminDashboard() {
                       <div>
                          <p className="text-xs font-semibold text-zinc-200">Optimisation</p>
                          <p className="text-xs text-zinc-400">
-                            Le modèle <span className="text-zinc-200 font-medium">Toyota Land Cruiser</span> génère 40% de votre traction actuelle.
+                            Le système est entièrement connecté à votre base de données Supabase.
                          </p>
                       </div>
                    </div>

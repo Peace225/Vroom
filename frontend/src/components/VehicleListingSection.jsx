@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from '../supabaseClient';
+import React, { useState, useEffect, forwardRef } from 'react';
+import { supabaseRental as supabase } from '../supabaseClient';
 
 // --- Icônes Vectorielles (SVG) ---
 const HeartIcon = ({ filled }) => (
@@ -205,8 +205,8 @@ const VehicleCard = ({ car, isFav, toggleFavorite, onSelectCar, onReserve }) => 
   );
 };
 
-// --- Composant Principal ---
-export default function VehicleRentalSection() {
+// --- Composant Principal avec forwardRef pour éviter les erreurs de ref ---
+const VehicleRentalSection = forwardRef((props, ref) => {
   const [filter, setFilter] = useState('ALL');
   const [favorites, setFavorites] = useState([]);
   const [selectedCar, setSelectedCar] = useState(null);
@@ -288,7 +288,7 @@ export default function VehicleRentalSection() {
   };
 
   return (
-    <section className="relative py-12 md:py-16 px-4 md:px-8 font-sans overflow-hidden min-h-screen flex items-center">
+    <section ref={ref} className="relative py-12 md:py-16 px-4 md:px-8 font-sans overflow-hidden min-h-screen flex items-center">
       
       {/* Arrière-plan */}
       <div className="absolute inset-0 z-0">
@@ -503,4 +503,6 @@ export default function VehicleRentalSection() {
       )}
     </section>
   );
-}
+});
+
+export default VehicleRentalSection;

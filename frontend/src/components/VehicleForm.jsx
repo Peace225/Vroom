@@ -3,8 +3,8 @@ import { Zap, ImageIcon, Trash2, Loader2, Key } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
-// SUPABASE (Remplace Firebase pour les requêtes)
-import { supabase } from '../supabaseClient';
+// SUPABASE (Mis à jour pour pointer vers le client de location configuré)
+import { supabaseRental as supabase } from '../supabaseClient';
 
 const Toast = Swal.mixin({
   toast: true,

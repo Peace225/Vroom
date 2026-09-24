@@ -1,6 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// 1. Client pour la Location
+const rentalUrl = import.meta.env.VITE_SUPABASE_URL;
+const rentalKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+if (!rentalUrl || !rentalKey) {
+  console.error("Erreur : VITE_SUPABASE_URL ou VITE_SUPABASE_ANON_KEY est manquant !");
+}
+
+export const supabaseRental = createClient(rentalUrl, rentalKey);
+
+// 2. Client pour la Vente
+const salesUrl = import.meta.env.VITE_SUPABASE_SALES_URL;
+const salesKey = import.meta.env.VITE_SUPABASE_SALES_ANON_KEY;
+
+export const supabaseSales = createClient(salesUrl, salesKey);
