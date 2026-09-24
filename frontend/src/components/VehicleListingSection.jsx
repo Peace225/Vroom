@@ -56,121 +56,18 @@ const WhatsAppIcon = () => (
   </svg>
 );
 
-// --- Liste des véhicules en location ---
-const mockVehicles = [
-  {
-    id: 1,
-    name: 'Kia Pegas',
-    year: 2023,
-    pricePerDay: 60000,
-    transmission: 'Manuelle',
-    fuel: 'Essence',
-    hasDriver: false,
-    images: [
-      '/images/voitures/kia-pegas-1.jpg',
-      '/images/voitures/kia-pegas-2.jpg',
-    ],
-    description: 'Une berline compacte économique, idéale pour vos déplacements urbains quotidiens avec un excellent rendement énergétique.',
-    caution: 40000,
-  },
-  {
-    id: 2,
-    name: 'Poer Kingkong 4X4 Pickup',
-    year: 2024,
-    pricePerDay: 60000,
-    transmission: 'Automatique',
-    fuel: 'Essence',
-    hasDriver: true,
-    images: [
-      '/images/voitures/poer-kingkong.jpg',
-      '/images/voitures/poer-kingkong1.jpg',
-      '/images/voitures/poer-kingkong2.jpg',
-      '/images/voitures/poer-kingkong3.jpg'
-    ],
-    description: 'Citadine agile et moderne, parfaite pour se faufiler facilement dans la circulation tout en profitant du confort d’un chauffeur professionnel.',
-    caution: 30000,
-  },
-  {
-    id: 3,
-    name: ' Mini Bus',
-    year: 2025,
-    pricePerDay: 60000,
-    transmission: 'Manuelle',
-    fuel: 'Essence',
-    hasDriver: false,
-    images: [
-      '/images/voitures/bus.jpg',
-      '/images/voitures/bus1.jpg',
-      '/images/voitures/bus2.jpg',
-    ],
-    description: 'Mini-SUV compact et ultra-économique, parfait pour les petits budgets à la recherche d’autonomie.',
-    caution: 30000,
-  },
-  {
-    id: 4,
-    name: 'Poer Kingkong 4X4 Pickup',
-    year: 2023,
-    pricePerDay: 60000,
-    transmission: 'Automatique',
-    fuel: 'Diesel',
-    hasDriver: true,
-    images: [
-      '/images/voitures/poer.jpg',
-      '/images/voitures/poer1.jpg',
-      '/images/voitures/poer-kingkong1.jpg',
-      '/images/voitures/poer-kingkong3.jpg'
-    ],
-    description: 'Le 4x4 de référence pour le grand confort, les missions hors d’Abidjan et les délégations officielles.',
-    caution: 150000,
-  },
-  {
-    id: 5,
-    name: 'Changan Gs5',
-    year: 2023,
-    pricePerDay: 60000,
-    transmission: 'Automatique',
-    fuel: 'Diesel',
-    hasDriver: false,
-    images: [
-      '/images/voitures/changan-gs.jpg',
-      '/images/voitures/changan-gs1.jpg',
-      '/images/voitures/changan-gs2.jpg',
-      '/images/voitures/changan-gs3.jpg'
-    ],
-    description: 'SUV moderne au design racé, offrant un espace intérieur généreux et un agrément de conduite exceptionnel.',
-    caution: 80000,
-  },
-  {
-    id: 6,
-    name: 'Kia Sportage',
-    year: 2022,
-    pricePerDay: 60000,
-    transmission: 'Automatique',
-    fuel: 'Diesel',
-    hasDriver: true,
-    images: [
-      '/images/voitures/kia.jpg',
-      '/images/voitures/kia1.jpg',
-      '/images/voitures/kia2.jpg',
-      '/images/voitures/kia3.jpg'
-    ],
-    description: 'Alliant élégance française et technologies de pointe, ce SUV garantit un voyage tout en douceur.',
-    caution: 75000,
-  },
-];
-
 // --- Composant d'une Carte de Véhicule ---
 const VehicleCard = ({ car, isFav, toggleFavorite, onSelectCar, onReserve }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const nextImage = (e) => {
     e.stopPropagation();
-    setCurrentImageIndex((prev) => (prev + 1) % car.images.length);
+    setCurrentImageIndex((prev) => (car.images.length > 0 ? (prev + 1) % car.images.length : 0));
   };
 
   const prevImage = (e) => {
     e.stopPropagation();
-    setCurrentImageIndex((prev) => (prev === 0 ? car.images.length - 1 : prev - 1));
+    setCurrentImageIndex((prev) => (car.images.length > 0 ? (prev === 0 ? car.images.length - 1 : prev - 1) : 0));
   };
 
   return (
@@ -179,7 +76,7 @@ const VehicleCard = ({ car, isFav, toggleFavorite, onSelectCar, onReserve }) => 
         {/* CARROUSEL D'IMAGES */}
         <div className="relative aspect-[16/10] bg-slate-100 overflow-hidden group/carousel">
           <img
-            src={car.images[currentImageIndex]}
+            src={car.images[currentImageIndex] || '/images/voitures/default.jpg'}
             alt={`${car.name} - Vue ${currentImageIndex + 1}`}
             className="w-full h-full object-cover transition-opacity duration-300"
           />
@@ -189,32 +86,38 @@ const VehicleCard = ({ car, isFav, toggleFavorite, onSelectCar, onReserve }) => 
             {car.hasDriver ? 'Avec chauffeur' : 'Sans chauffeur'}
           </span>
 
-          {/* Contrôles du Carrousel (Flèches) */}
-          <button 
-            type="button"
-            onClick={prevImage} 
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white p-1.5 rounded-full opacity-0 group-hover/carousel:opacity-100 transition-all duration-200 z-20 backdrop-blur-sm"
-          >
-            <ChevronLeftIcon />
-          </button>
-          
-          <button 
-            type="button"
-            onClick={nextImage} 
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white p-1.5 rounded-full opacity-0 group-hover/carousel:opacity-100 transition-all duration-200 z-20 backdrop-blur-sm"
-          >
-            <ChevronRightIcon />
-          </button>
+          {/* Contrôles du Carrousel (Flèches) - affichés que s'il y a plus d'une image */}
+          {car.images.length > 1 && (
+            <>
+              <button 
+                type="button"
+                onClick={prevImage} 
+                className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white p-1.5 rounded-full opacity-0 group-hover/carousel:opacity-100 transition-all duration-200 z-20 backdrop-blur-sm"
+              >
+                <ChevronLeftIcon />
+              </button>
+              
+              <button 
+                type="button"
+                onClick={nextImage} 
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white p-1.5 rounded-full opacity-0 group-hover/carousel:opacity-100 transition-all duration-200 z-20 backdrop-blur-sm"
+              >
+                <ChevronRightIcon />
+              </button>
+            </>
+          )}
 
           {/* Indicateurs du Carrousel (Points) */}
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
-            {car.images.map((_, idx) => (
-              <div 
-                key={idx} 
-                className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentImageIndex ? 'w-4 bg-white' : 'w-1.5 bg-white/50'}`} 
-              />
-            ))}
-          </div>
+          {car.images.length > 1 && (
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
+              {car.images.map((_, idx) => (
+                <div 
+                  key={idx} 
+                  className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentImageIndex ? 'w-4 bg-white' : 'w-1.5 bg-white/50'}`} 
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Contenu principal */}
@@ -308,8 +211,8 @@ export default function VehicleRentalSection() {
   const [favorites, setFavorites] = useState([]);
   const [selectedCar, setSelectedCar] = useState(null);
 
-  // 1. On initialise l'état directement avec mockVehicles pour qu'ils s'affichent immédiatement
-  const [vehicles, setVehicles] = useState(mockVehicles);
+  // État initial vide pour garantir que seules les vraies données s'affichent
+  const [vehicles, setVehicles] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -328,20 +231,16 @@ export default function VehicleRentalSection() {
       
       if (data) {
         const formattedData = data.map((car) => {
-          // 1. Traitement des images depuis le JSONB Supabase
-          // La BDD renvoie un objet type {"back": null, "front": "https://..."}
+          // Traitement sécurisé des images depuis le JSONB Supabase
           let carImages = [];
           if (car.images && typeof car.images === 'object') {
-            // On extrait toutes les valeurs de l'objet et on ne garde que les URLs valides (non nulles)
             carImages = Object.values(car.images).filter(val => val !== null && val !== '');
           }
           
-          // Image par défaut si aucune image valide n'est trouvée dans le JSON
           if (carImages.length === 0) {
             carImages = ['/images/voitures/default.jpg'];
           }
 
-          // 2. Formatage complet du véhicule
           return {
             id: car.id,
             name: `${car.brand || ''} ${car.model || ''}`.trim(),
@@ -349,17 +248,15 @@ export default function VehicleRentalSection() {
             pricePerDay: parseInt(car.price, 10) || 0,
             transmission: car.transmission || 'Non spécifié',
             fuel: car.fuel || 'Non spécifié',
-            hasDriver: car.has_driver || false,
+            hasDriver: car.has_driver || false, 
             images: carImages,
-            // Création d'une description par défaut basée sur la catégorie et la localisation
             description: `Véhicule de catégorie ${car.category || 'Standard'} disponible à ${car.location || 'Abidjan'}.`,
             caution: parseFloat(car.caution) || 0,
           };
         });
 
-        // Met à jour l'état (ici on garde vos mockVehicles pour l'exemple, 
-        // vous pouvez retirer "...mockVehicles" si vous ne voulez QUE les données de la base)
-        setVehicles([...mockVehicles, ...formattedData]);
+        // Met à jour l'état UNIQUEMENT avec les données formatées
+        setVehicles(formattedData);
       }
     } catch (error) {
       console.error("Erreur de chargement des véhicules Supabase :", error.message);
@@ -368,17 +265,17 @@ export default function VehicleRentalSection() {
     }
   }
 
-  // Le filtrage se fait maintenant sur le tableau fusionné (retrait de la déclaration en doublon)
+  // Filtrage réactif basé sur la valeur exacte de car.hasDriver
   const filteredVehicles = vehicles.filter((car) => {
-    if (filter === 'WITHOUT_DRIVER') return !car.hasDriver;
-    if (filter === 'WITH_DRIVER') return car.hasDriver;
-    return true;
+    if (filter === 'WITHOUT_DRIVER') return car.hasDriver === false;
+    if (filter === 'WITH_DRIVER') return car.hasDriver === true;
+    return true; // Si filter === 'ALL'
   });
 
   // Fonction pour générer le lien et ouvrir WhatsApp
   const handleWhatsAppReservation = (car) => {
-    const adminWhatsApp = "2250544404780"; // Numéro international sans +
-    const message = `Bonjour AutoLife, je souhaite réserver le véhicule suivant en location :\n- Modèle : ${car.name} (${car.year})\n- Tarif : ${car.pricePerDay.toLocaleString('fr-FR')} FCFA / jour\n- Formule : ${car.hasDriver ? 'Avec chauffeur' : 'Sans chauffeur'}\n\nPourriez-vous me confirmer sa disponibilité ?`;
+    const adminWhatsApp = "2250544404780"; 
+    const message = `Bonjour VroomCI, je souhaite réserver le véhicule suivant en location :\n- Modèle : ${car.name} (${car.year})\n- Tarif : ${car.pricePerDay.toLocaleString('fr-FR')} FCFA / jour\n- Formule : ${car.hasDriver ? 'Avec chauffeur' : 'Sans chauffeur'}\n\nPourriez-vous me confirmer sa disponibilité ?`;
     
     const whatsappUrl = `https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -419,13 +316,6 @@ export default function VehicleRentalSection() {
               Réservez votre véhicule <span className="font-bold text-blue-400">avec ou sans chauffeur</span> au meilleur tarif
             </p>
           </div>
-          <a
-            href="#voir-tout"
-            className="group inline-flex items-center gap-2 text-xs font-bold text-white hover:text-blue-300 uppercase tracking-wider self-start md:self-auto bg-white/10 hover:bg-white/20 backdrop-blur-md px-5 py-2.5 rounded-full border border-white/20 shadow-lg transition-all"
-          >
-            <span>Voir toutes les locations</span>
-            <span className="group-hover:translate-x-1 transition-transform">&gt;</span>
-          </a>
         </div>
 
         {/* Barre de filtre */}
@@ -467,19 +357,32 @@ export default function VehicleRentalSection() {
           </button>
         </div>
 
-        {/* Grille des cartes véhicules */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredVehicles.map((car) => (
-            <VehicleCard 
-              key={car.id}
-              car={car}
-              isFav={favorites.includes(car.id)}
-              toggleFavorite={toggleFavorite}
-              onSelectCar={setSelectedCar}
-              onReserve={() => handleWhatsAppReservation(car)}
-            />
-          ))}
-        </div>
+        {/* Affichage : Grille ou Indicateur de chargement */}
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="w-10 h-10 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+            <p className="text-white font-medium">Chargement des véhicules...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredVehicles.length > 0 ? (
+              filteredVehicles.map((car) => (
+                <VehicleCard 
+                  key={car.id}
+                  car={car}
+                  isFav={favorites.includes(car.id)}
+                  toggleFavorite={toggleFavorite}
+                  onSelectCar={setSelectedCar}
+                  onReserve={() => handleWhatsAppReservation(car)}
+                />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12 text-slate-400 bg-slate-900/40 rounded-2xl border border-white/10 backdrop-blur-md">
+                Aucun véhicule ne correspond à ce filtre pour le moment.
+              </div>
+            )}
+          </div>
+        )}
 
       </div>
 
@@ -498,7 +401,7 @@ export default function VehicleRentalSection() {
 
             {/* Colonne de Gauche : Image & Badge */}
             <div className="relative w-full md:w-1/2 h-56 sm:h-64 md:h-auto flex-shrink-0">
-              <img src={selectedCar.images[0]} alt={selectedCar.name} className="w-full h-full object-cover" />
+              <img src={selectedCar.images[0] || '/images/voitures/default.jpg'} alt={selectedCar.name} className="w-full h-full object-cover" />
               <div className="absolute bottom-3 left-3 md:bottom-4 md:left-4 bg-slate-900/80 backdrop-blur-md text-white text-[11px] md:text-xs font-bold px-3 py-1.5 rounded-lg border border-white/10 shadow-md">
                 {selectedCar.hasDriver ? 'Avec chauffeur' : 'Sans chauffeur'}
               </div>

@@ -62,8 +62,8 @@ export default function CarDetails() {
     if (!car) return;
 
     setIsSending(true);
-    const phoneNumber = "2250151104839";
-    const messageText = `Bonjour AutoLife ! 🚘\nJe suis intéressé par la ${car.brand} ${car.model} affichée à ${car.price}.\nPouvez-vous me donner plus d'infos ?`;
+    const phoneNumber = "2250544404780"; // Numéro WhatsApp de l'administrateur
+    const messageText = `Bonjour Vroom CI ! 🚘\nJe suis intéressé par la ${car.brand} ${car.model} affichée à ${car.price}.\nPouvez-vous me donner plus d'infos ?`;
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(messageText)}`;
 
     try {

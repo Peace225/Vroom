@@ -40,9 +40,9 @@ export default function DetailVehicule({ car, onBack }) {
         source: "Mobile Details",
         timestamp: serverTimestamp() 
       });
-      window.open(`https://wa.me/2250151104839?text=${encodeURIComponent(`Bonjour Vroom CI, je suis intéressé(e) par la ${carTitle} (${carPriceFormatted}).`)}`, '_blank');
+      window.open(`https://wa.me/2250544404780?text=${encodeURIComponent(`Bonjour Vroom CI, je suis intéressé(e) par la ${carTitle} (${carPriceFormatted}).`)}`, '_blank');
     } catch (error) {
-      window.open(`https://wa.me/2250151104839`, '_blank');
+      window.open(`https://wa.me/2250544404780`, '_blank');
     }
   };
 
